@@ -1,0 +1,5 @@
+{
+  "name": "Remix: FMath12",
+  "description": "Ứng dụng AI tạo đề thi trắc nghiệm Toán THPT (GDPT 2018) với hiển thị Unicode, chấm điểm tự động và lời giải chi tiết.",
+  "requestFramePermissions": []
+}

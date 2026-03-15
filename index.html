@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FMath12 - Học Toán 12</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+              'fade-in-up': 'fadeInUp 0.5s ease-out',
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'shine': 'shine 2s infinite',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              shine: {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(100%)' }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #f8fafc;
+        background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+        background-size: 24px 24px;
+      }
+      
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+        border: 2px solid #f8fafc;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      
+      .math-list-ol {
+        counter-reset: math-counter;
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 2rem;
+      }
+      .math-list-ol > li {
+        position: relative;
+        padding-left: 3.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .math-list-ol > li::before {
+        counter-increment: math-counter;
+        content: counter(math-counter);
+        position: absolute;
+        left: 0;
+        top: -2px;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        color: white;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        border: 2px solid #fff;
+      }
+
+      .math-list-ul {
+        list-style: none;
+        padding-left: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .math-list-ul > li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+        color: #334155;
+        line-height: 1.8;
+      }
+      .math-list-ul > li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 12px;
+        width: 8px;
+        height: 8px;
+        background-color: #f59e0b;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px #fef3c7;
+      }
+
+      .math-note {
+        position: relative;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 16px;
+        padding: 1.5rem 1.5rem 1.5rem 2rem;
+        margin: 2.5rem 0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+      .math-note::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        background: linear-gradient(to bottom, #3b82f6, #60a5fa);
+      }
+      .math-note::after {
+        content: "💡 GHI NHỚ";
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: #3b82f6;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-bottom-left-radius: 12px;
+        letter-spacing: 0.05em;
+      }
+      
+      .prose h1 { font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 1.5rem; }
+      .prose h2 { font-size: 1.5rem; font-weight: 700; color: #1e3a8a; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+      
+      .katex-display { 
+        margin: 1.5em 0; 
+        overflow-x: auto; 
+        padding: 0.5rem 0;
+      }
+      
+      .katex { font-size: 1.1em; color: inherit; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.7",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react": "https://esm.sh/react@18.2.0",
+    "react-markdown": "https://esm.sh/react-markdown@9.0.1?bundle&external=react,react-dom",
+    "remark-math": "https://esm.sh/remark-math@6.0.0?bundle",
+    "remark-breaks": "https://esm.sh/remark-breaks@4.0.0?bundle",
+    "rehype-katex": "https://esm.sh/rehype-katex@7.0.0?bundle",
+    "remark-gfm": "https://esm.sh/remark-gfm@4.0.0?bundle",
+    "lucide-react": "https://esm.sh/lucide-react@0.330.0?external=react,react-dom"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex flex-col">
+    <div id="root" class="h-full flex flex-col"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
