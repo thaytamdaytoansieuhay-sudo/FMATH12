@@ -50,10 +50,8 @@ export interface Exercise {
 }
 
 export interface ChatMessage {
-  id: string;
-  role: 'user' | 'model';
-  text: string;
-  isError?: boolean;
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export interface TextbookChapter {

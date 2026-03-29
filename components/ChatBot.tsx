@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '../types';
-import { chatWithAI } from '../services/geminiService';
+import { chatWithAI } from '../services/groqService';
 import MathRenderer from './MathRenderer';
 import { MessageCircle, X, Send, Loader2, Sparkles, Bot } from 'lucide-react';
 

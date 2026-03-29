@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generateHint } from '../services/geminiService';
+import { generateHint } from '../services/groqService';
 import MathRenderer from './MathRenderer';
 import { Lightbulb, Loader2, AlertCircle } from 'lucide-react';
 

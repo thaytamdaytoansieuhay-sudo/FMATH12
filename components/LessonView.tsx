@@ -4,7 +4,7 @@ import { LessonContent, Exercise, PracticeConfig } from '../types';
 import MathRenderer from './MathRenderer';
 import ExplanationSection from './ExplanationSection';
 import HintButton from './HintButton';
-import { generatePracticeExercises, generateAIFeedback } from '../services/geminiService';
+import { generatePracticeExercises, generateAIFeedback } from '../services/groqService';
 import { BookOpen, CheckCircle, AlertCircle, ArrowRight, ArrowLeft, Sparkles, Zap, Loader2, Key, Info, Sigma, Globe, LayoutGrid, RotateCcw, Bot, BarChart3 } from 'lucide-react';
 
 interface LessonViewProps {

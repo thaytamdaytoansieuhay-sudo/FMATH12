@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { AppStatus, LessonContent, TextbookChapter } from './types';
-import { getLessonContent } from './services/geminiService';
 import LessonView from './components/LessonView';
 import ChatBot from './components/ChatBot';
 import { Menu, GraduationCap, Sparkles, ChevronDown, CheckCircle2, Play, ArrowRight, BookOpen, Layers, Star, Zap, ShieldAlert, Key, Check, AlertTriangle } from 'lucide-react';
+import { getLessonContent } from './services/groqService.ts';
 
 const TEXTBOOK_STRUCTURE: TextbookChapter[] = [
     {
@@ -62,40 +62,22 @@ interface UserProgress {
   completed: Record<string, number>;
 }
 
+interface Props {
+  topic: string;
+  onError?: (msg: string) => void;
+}
+
 const App: React.FC = () => {
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
   const [currentLesson, setCurrentLesson] = useState<LessonContent | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeLessonName, setActiveLessonName] = useState('');
-  const [hasApiKey, setHasApiKey] = useState(false);
-  const [isKeyInvalid, setIsKeyInvalid] = useState(false);
+  const [aiError, setAiError] = useState('');
   
   const [expandedChapter, setExpandedChapter] = useState<number | null>(0);
   const [homeExpandedChapter, setHomeExpandedChapter] = useState<number | null>(0);
   
   const [userProgress, setUserProgress] = useState<UserProgress>({ viewed: [], completed: {} });
-
-  const checkStatus = async () => {
-      // @ts-ignore
-      const selected = await window.aistudio.hasSelectedApiKey();
-      const systemKeyExists = !!process.env.API_KEY && process.env.API_KEY.length > 5;
-      setHasApiKey(selected || systemKeyExists);
-  };
-
-  useEffect(() => {
-    checkStatus();
-    const saved = localStorage.getItem('math_progress');
-    if (saved) {
-      try { setUserProgress(JSON.parse(saved)); } catch (e) { console.error(e); }
-    }
-  }, []);
-
-  const handleActivateAI = async () => {
-    // @ts-ignore
-    await window.aistudio.openSelectKey();
-    setIsKeyInvalid(false);
-    setHasApiKey(true);
-  };
 
   const saveProgress = (newProgress: UserProgress) => {
     setUserProgress(newProgress);
@@ -103,6 +85,7 @@ const App: React.FC = () => {
   };
 
   const handleLessonSelect = async (lessonName: string) => {
+    setAiError('');
     setActiveLessonName(lessonName);
     if (!userProgress.viewed.includes(lessonName)) {
         saveProgress({ ...userProgress, viewed: [...userProgress.viewed, lessonName] });
@@ -128,13 +111,6 @@ const App: React.FC = () => {
       });
   };
 
-  const onAIError = (errType: string) => {
-    if (errType === 'RESELECT_KEY') {
-        setIsKeyInvalid(true);
-        setHasApiKey(false);
-    }
-  };
-
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900">
       
@@ -157,32 +133,7 @@ const App: React.FC = () => {
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-100">
             <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Trợ lý AI</span>
-                {hasApiKey ? (
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                        <Check size={10} /> SẴN SÀNG
-                    </span>
-                ) : (
-                    <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
-                        CHƯA KẾT NỐI
-                    </span>
-                )}
             </div>
-            
-            {isKeyInvalid && (
-                <div className="mb-3 p-2 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 animate-pulse">
-                    <AlertTriangle size={14} className="text-red-600 shrink-0 mt-0.5" />
-                    <p className="text-[10px] text-red-700 font-medium leading-tight">Khóa cũ không hợp lệ hoặc hết hạn. Vui lòng kết nối lại.</p>
-                </div>
-            )}
-
-            {!hasApiKey && (
-                <button 
-                    onClick={handleActivateAI}
-                    className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-blue-100"
-                >
-                    <Sparkles size={14} /> KÍCH HOẠT AI
-                </button>
-            )}
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
@@ -225,9 +176,6 @@ const App: React.FC = () => {
         <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center px-4 justify-between shrink-0 lg:hidden sticky top-0 z-20">
             <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-slate-600"><Menu size={24} /></button>
             <span className="font-bold text-slate-800">FMath12</span>
-            {!hasApiKey ? (
-                 <button onClick={handleActivateAI} className="p-2 text-blue-600"><Sparkles size={20}/></button>
-            ) : <div className="w-8"></div>}
         </header>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth bg-[#f8fafc]">
@@ -241,22 +189,7 @@ const App: React.FC = () => {
                             <p className="text-lg text-blue-100 mb-8 leading-relaxed font-medium">
                                 Hệ thống học tập thông minh dựa trên dữ liệu SGK 2018. Tự động soạn đề, chấm điểm và giải thích chi tiết.
                             </p>
-                            {!hasApiKey && (
-                                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 mb-8">
-                                    <p className="text-sm font-bold text-blue-200 flex items-center gap-2 mb-4">
-                                        <ShieldAlert size={16} /> BẠN ĐANG XEM QUA LINK CHIA SẺ?
-                                    </p>
-                                    <p className="text-xs text-blue-50 mb-4 opacity-80 leading-relaxed">
-                                        Để bảo mật, API Key của chủ sở hữu không được nhúng sẵn. Vui lòng kết nối API Key cá nhân từ <strong>Google AI Studio</strong> để sử dụng Chatbot và Soạn đề.
-                                    </p>
-                                    <button 
-                                        onClick={handleActivateAI}
-                                        className="bg-blue-500 hover:bg-blue-400 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-lg"
-                                    >
-                                        <Key size={16} /> Kết nối khóa AI của bạn
-                                    </button>
-                                </div>
-                            )}
+                            
                             <button 
                                 onClick={() => document.getElementById('chapters')?.scrollIntoView({ behavior: 'smooth' })}
                                 className="bg-white text-slate-900 px-8 py-3.5 rounded-full font-bold shadow-lg hover:bg-blue-50 transition-all flex items-center gap-2"
@@ -339,11 +272,16 @@ const App: React.FC = () => {
             )}
 
             {status === AppStatus.VIEWING_LESSON && currentLesson && (
-                <LessonView content={currentLesson} onLessonComplete={handleLessonComplete} onAIError={onAIError} />
+                <LessonView content={currentLesson} onLessonComplete={handleLessonComplete} />
             )}
         </div>
         
-        {status === AppStatus.VIEWING_LESSON && currentLesson && <ChatBot topic={currentLesson.topic} onAIError={onAIError} />}
+        {status === AppStatus.VIEWING_LESSON && currentLesson && <ChatBot topic={currentLesson.topic} onAIError={(msg: string) => setAiError(msg)}/>}
+        {aiError && (
+            <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow">
+                {aiError}
+            </div>
+            )}
       </main>
     </div>
   );

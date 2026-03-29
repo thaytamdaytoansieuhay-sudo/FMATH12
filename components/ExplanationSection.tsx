@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import MathRenderer from './MathRenderer';
-import { generateAlternativeExplanation } from '../services/geminiService';
+import { generateAlternativeExplanation } from '../services/groqService';
 import { Lightbulb, RotateCcw, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
 
 interface ExplanationSectionProps {
